@@ -1,0 +1,19 @@
+# Technical Reference: System Network Architecture and Ports
+
+## NexusFlow Core Service
+*   **Service Name**: `nexusflow-core`
+*   **Binding Port**: `9443/TCP`
+*   **Protocol**: HTTPS (TLS 1.3 mandatory)
+*   **Security Context**: Public ingress endpoint; certificate rotation required at `/var/ssl/nexus/core.pem`.
+
+## Internal Routing Mesh
+*   **Service Name**: `internal-mesh-router`
+*   **Binding Port**: `7070/TCP`
+*   **Protocol**: mTLS (Mutual TLS)
+*   **Scope**: Inter-service communication within the containerized routing layer. External access restricted via egress firewall rules.
+
+## Backend Database Layer
+*   **Service Name**: `db-cluster-primary`
+*   **Cluster IP**: `10.0.4.15` (Subnet: `/24`)
+*   **Access Control**: StatefulSet-based locking; external connectivity denied by default.
+*   **Connection String Format**: `sql://<instance>.internal-dns.svc.cluster.local:3306?sslmode=require&host=10.0.4.15`

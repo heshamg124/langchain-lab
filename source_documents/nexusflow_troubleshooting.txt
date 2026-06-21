@@ -1,0 +1,31 @@
+# NexusFlow System Operations Reference Sheet: Error Logs & Troubleshooting
+
+## Subject: Database Connectivity Failures (ERR_NEXUS_DISCONNECT)
+
+### 1. Symptom Definition
+**Error Code:** `ERR_NEXUS_DISCONNECT`  
+**Severity Level:** Critical  
+**Description:** Indicates an involuntary termination of the active database session or loss of connectivity between the NexusFlow agent and the primary data repository. This state persists until manual intervention restores the link, potentially causing write queuing delays and read timeouts on dependent services.
+
+### 2. Diagnostic Log Location
+Storage tracking for this error code is hardcoded to:  
+`/var/log/nexusflow/system.log`  
+
+*   **Log Pattern:** Lines prefixed with `[ERROR] ERR_NEXUS_DISCONNECT` contain the timestamp, connection ID (CID), and reason string (e.g., `TIMEOUT`, `NETWORK_RESET`).
+*   **Rotation Policy:** Logs rotate daily; verify current active file based on system cron configuration.
+
+### 3. Remediation Procedure
+**Action Type:** Mandatory Reconnection  
+**Command:** Execute the following command with root privileges to force re-establishment of the database session:  
+
+```bash
+nexusctl --reconnect --force
+```
+
+*   **Parameter Breakdown:**
+    *   `--reconnect`: Initiates a handshake sequence with available backup nodes or primary if recovered.
+    *   `--force`: Bypasses automatic retry throttling limits and ignores transient network latency checks, ensuring immediate re-attachment to the cluster.
+*   **Verification Step:** Confirm resolution by checking `/var/log/nexusflow/system.log` for a subsequent `[INFO] CONNECT_ESTABLISHED` entry following command execution.
+
+### 4. Prevention Guidelines
+Ensure underlying network interfaces maintain stable uplinks and verify database server resource availability (CPU/Memory) prior to peak load cycles to minimize transient drop occurrences requiring forced reconnection.

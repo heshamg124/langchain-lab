@@ -1,0 +1,21 @@
+# Technical Reference: Server Hardware & Deployment Budgets (Production Cluster)
+
+## 1. Node Resource Specifications (Minimum Requirement)
+| Component | Specification Constraint | Notes |
+| :--- | :--- | :--- |
+| **System Memory** | ≥ 32 GB RAM per node | Required for production workload isolation and caching layers. |
+| **Virtual CPUs** | ≥ 8 vCPUs per node | Mandatory minimum to sustain concurrency thresholds. |
+
+## 2. Storage Architecture Standards
+*   **Media Type**: Solid State Drives (SSD) exclusively.
+*   **IOPS Benchmark**: Minimum sustained read/write throughput of **10,000 IOPS** per partition.
+*   **Partitioning Rule**: All data volumes must be allocated to dedicated SSD partitions; HDD or hybrid RAID configurations are prohibited in production environments.
+
+## 3. Deployment Configuration Protocol
+All deployment scripts and orchestration jobs targeting a live cluster environment must include the following mandatory environmental flag:
+
+```bash
+NEXUS_ENV=production
+```
+
+*Failure to set `NEXUS_ENV=production` will default the instance to staging mode, violating compliance protocols.*

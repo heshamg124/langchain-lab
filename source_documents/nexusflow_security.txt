@@ -1,0 +1,31 @@
+# Technical Reference Sheet: Security Protocols and Access Control Limits
+
+## Overview
+This document defines mandatory security constraints for the NexusFlow administrative environment, focusing on authentication mechanisms, session lifecycle management, and network access policies.
+
+---
+
+### 1. Authentication Requirements
+*   **Administrative Console Access**: Enforced Multi-Factor Authentication (MFA) is a prerequisite condition for all user accounts attempting to authenticate via the administrative console. Single-sign-on or password-only methods are explicitly rejected at this tier of access control.
+    *   `Auth_Mode`: MANDATORY_MFA
+    *   `Failure_Action`: Immediate_session_termination
+
+### 2. Session Management & Token Lifecycle
+*   **Bearer Tokens**: All Bearer session tokens utilize a sliding idle timeout mechanism rather than absolute login time.
+*   **Idle Threshold**: Automatic token invalidation occurs strictly after **15 minutes** of inactivity (no HTTP request/response interaction).
+    *   `Token_Expiry_Type`: Idle_Timeout_Based
+    *   `Max_Idle_Duration_Secs`: 900
+
+### 3. Cross-Origin Resource Sharing (CORS) Policy
+*   **Origin Restriction**: The global CORS policy enforces a strict Allowlist model. All cross-origin requests must originate from domains matching the specific suffix pattern defined below. Requests failing this validation are rejected with HTTP Status `403 Forbidden`.
+    *   `Allowed_Suffix`: `.nexusflow.internal`
+    *   `Wildcard_Pattern`: `*.{domain}.internal` (where `{domain}` is any valid subdomain)
+    *   `Excluded_TLDs`: All TLDs other than internal suffixes are prohibited.
+
+### 4. Compliance Matrix Summary
+
+| Control Point | Configuration Value | Enforcement Level |
+| :--- | :--- | :--- |
+| **Console Auth** | MFA Required | Hard Block (Non-configurable) |
+| **Session Timeout** | 15 min Idle | Automatic Revocation |
+| **CORS Origin Regex** | `.*\.nexusflow\.internal`$ | Strict Allowlist Only |

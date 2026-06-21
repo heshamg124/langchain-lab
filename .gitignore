@@ -1,0 +1,74 @@
+# =====================================================================
+# 🐍 Python Core & Execution Artifacts
+# =====================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# =====================================================================
+# 💻 Virtual Environments & Dependencies
+# =====================================================================
+# Excludes the heavy isolated local dependency installations
+.venv/
+.venv-1/
+venv/
+ENV/
+env/
+ENV/
+bin/
+include/
+lib/
+
+# =====================================================================
+# 🧠 Vector Databases, Cache files & Dynamic Lab Outputs
+# =====================================================================
+# Excludes SQLite/Binary data vectors from local similarity searches
+.chroma/
+*.chroma
+chroma.sqlite3
+/langchain-lab/source_documents/
+/docs/
+
+# =====================================================================
+# 🔑 Security Secrets & Environmental Variations
+# =====================================================================
+# Prevents catastrophic cloud exposure of private base URLs or API keys
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+
+# =====================================================================
+# 🛠️ Editor Workspace Ecosystem Logs
+# =====================================================================
+# Excludes local personal window preferences and extension state flags
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+.DS_Store
