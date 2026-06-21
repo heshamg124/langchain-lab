@@ -72,3 +72,5 @@ chroma.sqlite3
 *.swp
 *.swo
 .DS_Store
+memory.md
+MEMORY.md
