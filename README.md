@@ -13,41 +13,29 @@ This laboratory details the engineering transition from a stateless raw HTTP API
 
 The projects inside this laboratory run completely locally on consumer-grade hardware. By swapping the traditional cloud provider layer for a localized setup at `/path/to/project`, this repository demonstrates how to retain full data privacy, fine-tune hyper-parameters (such as context window ceilings and temperature settings), and eliminate runtime cloud API transaction costs without exposing local environment specifics:
 
-## **🏗️ Core Laboratory Architecture Overview**
-    
-[Architecture Diagram with Data Flow]
+## **Core Laboratory Architecture Overview**
 
-### **Data-flow Pipeline View** 
+```mermaid
+flowchart LR
+    %% Subgraphs and Structural Nodes
+    subgraph Sandbox ["Mac Local Virtual Env (.venv)"]
+        Terminal[User Terminal]
+        LCEL[ChatPromptTemplate + Pydantic Schemas]
+        CoreChain[LCEL RunnableSequence Execution Graph]
+        VectorStore[(ChromaDB Vector Store)]
+    end
 
-```mermaid  
-flowchart LR   
-    A["User Terminal"] --> B(ChatPromptTemplate) 
-    B --- C(CoreChain Sequence Graph)
-    C -.-> D[(ChromaDB Vector Store)]:::dotStyle
-    E[qwen3.5 Reasoning Model] <--> F("Ollama RPC Endpoint")
+    subgraph OllamaHost ["Ollama Host"]
+        ReasoningEngine[qwen3.5:9b Reasoning Model]
+    end
 
-    A -.- G["stdin/TTY Layer"]    
-    H[System Prompt + User Query Injection]</b> --> I[PydanticSchemaValidation] 
-    I --- B
-    
-    style A fill:#2e7d32,stroke:#1b5e20,color:white        
-    style B,C fill:#fdd835, stroke:#ea6e1a
-    style D::class-fill none;dot-style,stroke-dasharray: 4    
-    style E fill:#fff,fill-opacity:0.7
+    %% Explicit Core Pipeline Directives (Ensures arrow rendering)
+    Sandbox --> CoreChain
+    Terminal --> LCEL
+    CoreChain --- VectorStore
 
-<style>
-.dotStyle {stroke-width:2px;}  
-</style>```    
-
-### **Why arrows render correctly:**      
-- No subgraph boundary interference (removed confusing `Sandbox --> CoreChain` parent-level directives) 
-- All connections between dataflow nodes use direct edge syntax (`A --- B`) rather than indirect routing
-- Removed style definitions that conflict with Mermaid core classes; using only `.style` blocks within the mermaid block itself for safe styling
-
-**Key Takeaways:**  
-1. **Subgraphs break LR flowcharts**: Use them sparingly or switch to `flowchart TB` (top-down) syntax where subgraph containment matters more than arrow direction
-2. **Direct node-to-node edges win**: Always add explicit arrows between every logical step in your pipeline before relying on "implicit flows" 
-3. **Ollama RPC mode simplifies diagrams**: When both LLM and code run on same machine, remove the OllamaHost subgraph entirely - show only `ReasoningEngine[qwen3.5:9b]` as external service node,stroke-width:1px,color:#fff
+    %% Direct Node Style Rules (Bypasses classDef rendering drops)
+    style Terminal fill:#23272e,stroke:#343942,stroke-width:1px,color:#fff
     style ReasoningEngine fill:#1f2335,stroke:#3b4261,stroke-width:1px,color:#fff
 ```
 ## ---
@@ -113,41 +101,9 @@ flowchart LR
 * **Purpose**: Guarantees absolute citation precision, eliminates hallucination vectors, and removes the cognitive load of citation formatting from the conversational generator.  
 * **Architecture**: Implements a **Decoupled Multi-Agent Dual-Model** topology that splits text synthesis from factual verification. Rather than asking a single LLM call to find information, phrase an answer, and track metadata formatting simultaneously, this script passes the data through two specialized, isolated steps sequentially.
 
+## **🏛️ Architectural Topology Diagram**
 
-## **🏛️ LLM-Judge Enterprise Architecture Pattern**  
-
-## **🏛️ Enterprise RAG Pattern** - Simplified Direct Node Connections (arrow fix)
-
-
-```mermaid  
-flowchart TD   
-    %% Layered design patterns for enterprise-grade LLM orchestration
-    
-Start["User Query Input"] --> A{Retrieval: Vector DB Search} 
-A -.-> B[`Extract top-k chunks` <br/> k=4] 
-
-B <--- C[Inject XML Wrappers Source Docs]<==> D{{LLM Generator<br/>(No syntax tracking)}} 
-
-E[[Judge LLM #2]]::judge --Line-by-Line Fact-Check--> F{Raw Answer Validation}
-F --> G[`Anchored Citations Output`] :::outputStyle  
-
-G <--- H[Presentation Layer] ::class-style fill:none,dash  
-I[Terminal Display] -.-> Start
-
-# Input layer styles 
-style A,B,C,D,E,F,G,H,Start,I,J,K class-type inputNode stroke-dasharray: 4,class-fill:none
-
-
-```
-**Diagram rendering notes (no subgraph interference):**    
-- All direct edge syntax before style blocks applies correctly  
-- No `RuntimeEnv` or boundary-level parent wrapping that drops internal connections  
-style E::class-fill #ffb8b8,,color:black   
-style I,J,K class-type start
-
-<style> .outputNode {rx:round;ry:-12}  
-.inputNode {rx:message;}  
-    </style```"""
+```mermaid
 flowchart TD
     %% Main Runtime Environment Subgraph
     subgraph RuntimeEnv ["/path/to/project/Runtime Environment (Local venv/)"]
@@ -276,3 +232,5 @@ When compiling text tasks over native reasoning architectures, the internal mode
 * In **Structured/Judge Steps**, we retain the model's native properties to give the network full cognitive headroom to resolve complex validation operations without breaking format syntax requirements.
 
 ---
+
+This file is thoroughly detailed and ready to serve as the face of your GitHub project\! Let me know if you would like to begin formatting your commit pushes.
