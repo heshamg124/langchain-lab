@@ -28,11 +28,8 @@ flowchart LR
         VectorStore[(ChromaDB<br/>Vector Store)]
     end
     
-    
-    subgraph OllamaHost["Ollama Host", direction LR]
-    
-         ReasoningEngine[qwen3.5:9b<br/>Reasoning Model]:::label2
-
+    subgraph OllamaHost["Ollama Host"]
+        ReasoningEngine[qwen3.5:9b<br/>Reasoning Model]:::label2
     end
     
     Sandbox --> CoreChain
@@ -109,29 +106,25 @@ flowchart LR
 
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph MainRuntime["/path/to/project Runtime Environment"]
-        
-        direction TB
-        
-        stage1[("1️⃣ Ingestion<br/>& Retrieval Layer")]:::stageBorder
+        stage1[("1⃣ Ingestion<br/>& Retrieval Layer")]:::stageBorder
         stage1Details["• User Query ➜ Vector Search<br/>• Top-4 Chroma Chunks (XML)"]:::subtle
         
         downArrow1[▼]:::arrowStyle
         
-        stage2[("2️⃣ Generator Node<br/>(LLM #1)")]:::stageBorder
+        stage2[("2⃣ Generator Node<br/>(LLM #1)")]:::stageBorder
         stage2Details["• Task: Conversational Synthesis<br/>• Output: Pure Raw Text (no formatting)"]:::subtle
         
         downArrow2[▼]:::arrowStyle
         
-        stage3[("3️⃣ Judge Node<br/>(LLM #2)")]:::stageBorder
+        stage3[("3⃣ Judge Node<br/>(LLM #2)")]:::stageBorder
         stage3Details["• Fact Audit & Lineage Check<br/>• Output: Raw Text + Injected Anchors"]:::subtle
         
         downArrow3[▼]:::arrowStyle
         
-        stage4[("4️⃣ Presentation Layer")]:::stageBorder
+        stage4[("4⃣ Presentation Layer")]:::stageBorder
         stage4Details["• Programmable String Swap<br/>• ANSI Magenta Styled Citations"]:::subtle
-        
     end
     
     MainRuntime -.-> TerminalTerminal[(User Terminal)]
