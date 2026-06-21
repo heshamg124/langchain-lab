@@ -12,20 +12,29 @@ This laboratory details the engineering transition from a stateless raw HTTP API
 **🏗️ Core Laboratory Architecture Overview**
 
 The projects inside this laboratory run completely locally on consumer-grade hardware. By swapping the traditional cloud provider layer for a localized setup at `/path/to/project`, this repository demonstrates how to retain full data privacy, fine-tune hyper-parameters (such as context window ceilings and temperature settings), and eliminate runtime cloud API transaction costs without exposing local environment specifics:
-                  `┌──────────────────────────────────────────────┐`  
-                  `│          Mac Local Virtual Env (.venv)       │`  
-                  `│                                              │`  
- `┌───────────┐    │  ┌──────────────────┐      ┌──────────────┐  │    ┌─────────────────┐`  
- `│   User    │───┼─>│ Prompt Templates │─────>│  LCEL Chain  │──┼───>│   Ollama Host   │`  
- `│ Terminal  │<──┼──│   & Pydantic      │<─────│ Execution    │◄─┼────│ (qwen3.5:9b)   │`  
- `└───────────┘    │  └──────────────────┘      └──────────────┘  │    └─────────────────┘`  
-                  `│                                   │          │             │`  
-                  `│                                   ▼          │             ▼`  
-                  `│                            ┌──────────────┐  │    ┌─────────────────┐`  
-                  `│                            │   ChromaDB   │  │    │ Hardware Params │`  
-                  `│                            │  Vector Store│  │    │  (num_predict)  │`  
-                  `│                            └──────────────┘  │    └─────────────────┘`  
-                  `└──────────────────────────────────────────────┘`
+
+## **Core Laboratory Architecture Overview**
+
+```mermaid
+flowchart LR
+    subgraph Sandbox ["Mac Local Virtual Env (.venv)"]
+        Terminal[User Terminal]:::label1
+        LCEL[ChatPromptTemplate + Pydantic Schemas]
+        CoreChain[LCEL RunnableSequence Execution Graph]
+        VectorStore[(ChromaDB Vector Store)]
+    end
+
+    subgraph OllamaHost ["Ollama Host"]
+        ReasoningEngine[qwen3.5:9b Reasoning Model]:::label2
+    end
+
+    Sandbox --> CoreChain
+    Terminal -.-> LCEL
+    CoreChain ~~~ VectorStore
+
+    classDef label1 fill:#23272e,stroke:#343942,stroke-width:1px,color:#fff;
+    classDef label2 fill:#1f2335,stroke:#3b4261,stroke-width:1px,color:#fff;
+```
 
 ## ---
 
