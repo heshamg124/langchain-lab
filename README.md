@@ -142,40 +142,37 @@ flowchart TB
 
     %% ============ STAGE 1: INGESTION & CONTEXT RETRIEVAL ==================
     
-    S1["Stage 1⃣ Ingestion \& Retrieval Layer"]:::stageBorder
-    
-    Step1a[User Query Received] --> EMB["Embedding Compute (HuggingFace local)"]
-    EMB --> CHROM[(ChromaDB Similarity Search<br/>k=4 top chunks)]
-    
-    DOCs{Retrieved Docs}
-    DOCClose[`<doc name="nexusflow_deployment.txt">`] -.-> DOCs -.-
-    TEXT[`Production cluster deployments require a minimum of 32GB RAM...`] -.-> DOCClose
-    
-    Step1b[XML Tag Wrap Each Passage] --> XMLBUNDLE["Compile: <root><doc>...</doc></root>"]:::subtle
+    S1["Stage 1 Ingestion and Retrieval Layer"]:::stageBorder
 
+Step1a[User Query Received] --> EMB[`Embedding Compute via HuggingFace local`]
+EMB --> CHROM[`ChromaDB vector search returns k=4 top chunks from index`]
+
+DOCClose [`<doc name="nexusflow_deployment.txt">`][subtle -.-> DOCS -.- TEXT[Production cluster deployments require 32GB RAM minimum...] -> </doc>]
+
+Step1b[XMLEncap pass] --> XMLBUNDLE[`Compile root wrapper with embedded doc contents`]:::subtle
     %% ============ STAGE 2: GENERATOR NODE (LLM #1) ==========================
     
     ArrowDown[S1 → S2 ▼]:::arrowStyle
     
-    S2["Stage 2⃣ Generator Node<br/>(qwen3.5:9b - LLM#1)"]:::stageBorder
+    S2["Stage 2 Generator Node (qwen3.5:9b - LLM#1)"]:::stageBorder
     
     Prompt2[System: Support Engineer \| Temp=0.7<br/>Constraint: Natural language only, no formatting syntax]
     
-    XMLBUNDLE --> PROMPTinject[Inject into ChatPromptTemplate v1 + User Query] --> GENRESP["Raw Generation (reasoning=False)<br/>Output: Pure text"]<br/><i>"To deploy a production node you must provide at least 32GB RAM and 8 vCPUs."</i>
+    XMLBUNDLE --> PROMPTinject[Inject into ChatPromptTemplate v1 + User Query] --> GENRESP["Raw Generation (reasoning=False)<br/>Output: Pure text"]<i>"To deploy a production node you must provide at least 32GB RAM and 8 vCPUs."</i>
     
     %% ============ STAGE 3: JUDGE EVALUATOR NODE (LLM #2) ====================
 
     ArrowDown2[S2 → S3 ▼]:::arrowStyle
     
-    S3["Stage 3⃣ Judge Evaluator Node<br/>(Judge LLM - qwen3.5 \| T=0.0)"]:::stageBorder
+    S3["Stage 3 Judge Evaluator Node (Judge LLM - qwen3.5 | T=0.0)"]:::stageBorder
     
     Prompt3[System: Verify each claim vs source docs.<br/>Output anchors ONLY where facts match.]
     
     GENRESP -.-> CLAIMs[Extract claims from output]
     CLAIMs --> VERIFY{Compare vs XML sources}
     
-    VerifyYes["Match found? → Append:<br/>(BRACKET_START_nexusflow_deployment.txt_BRACKET_END)"]:::subtle
-    
+    VerifyYes["Match found? → Append anchor string"]:::subtle
+
     %% ============ STAGE 4: PRESENTATION LAYER ==============================
 
     ArrowDown3[S3 → S4 ▼]:::arrowStyle
@@ -183,7 +180,6 @@ flowchart TB
     REPL[Python .replace() swap<br/>Custom anchors → ANSI magenta colors (\033[1;95m)]
     
     Terminal[(Rendered Output:<br/>Magenta Citation Tags on Black Background):::outputNode]
-
 ```
 
 > **Note**: This vertical `flowchart TB` replaces the wrapped markdown table (previously broken due to long cell text). Each stage connects via downward arrows showing sequential processing from ingestion through presentation.
