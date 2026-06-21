@@ -17,25 +17,27 @@ The projects inside this laboratory run completely locally on consumer-grade har
 
 ```mermaid
 flowchart LR
+    %% Subgraphs and Structural Nodes
     subgraph Sandbox ["Mac Local Virtual Env (.venv)"]
-        Terminal[User Terminal]:::label1
+        Terminal[User Terminal]
         LCEL[ChatPromptTemplate + Pydantic Schemas]
         CoreChain[LCEL RunnableSequence Execution Graph]
         VectorStore[(ChromaDB Vector Store)]
     end
 
     subgraph OllamaHost ["Ollama Host"]
-        ReasoningEngine[qwen3.5:9b Reasoning Model]:::label2
+        ReasoningEngine[qwen3.5:9b Reasoning Model]
     end
 
+    %% Explicit Core Pipeline Directives (Ensures arrow rendering)
     Sandbox --> CoreChain
-    Terminal -.-> LCEL
-    CoreChain ~~~ VectorStore
+    Terminal --> LCEL
+    CoreChain --- VectorStore
 
-    classDef label1 fill:#23272e,stroke:#343942,stroke-width:1px,color:#fff;
-    classDef label2 fill:#1f2335,stroke:#3b4261,stroke-width:1px,color:#fff;
+    %% Direct Node Style Rules (Bypasses classDef rendering drops)
+    style Terminal fill:#23272e,stroke:#343942,stroke-width:1px,color:#fff
+    style ReasoningEngine fill:#1f2335,stroke:#3b4261,stroke-width:1px,color:#fff
 ```
-
 ## ---
 
 **🗂️ Lab Program Directory & Flow Mechanics**
