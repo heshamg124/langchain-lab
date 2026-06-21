@@ -103,35 +103,31 @@ flowchart LR
 
 ## **🏛️ Architectural Topology Diagram**
 
-                                  `┌────────────────────────────────────────────────────────┐`  
-                                  `│ /path/to/project/Runtime Environment (Local venv/)    │`  
-                                  `│                                                        │`  
-                                  `│   ┌──────────────────────────────────────────────┐     │`  
-                                  `│   │        1. Ingestion & Retrieval Layer        │     │`  
-                                  `│   │  [User Query] ➔ [Vector Similarity Search]   │     │`  
-                                  `│   └──────────────────────────────────────────────┘     │`  
-                                  `│                           │                            │`  
-                                  `│                           ▼ (Top 4 Chunks in XML)      │`  
-                                  `│   ┌──────────────────────────────────────────────┐     │`  
-                                  `│   │          2. Generator Node (LLM 1)           │     │`  
-                                  `│   │    - Task: Conversational Synthesis          │     │`  
-                                  `│   │    - Output: Pure, Unformatted Raw Text      │     │`  
-                                  `│   └──────────────────────────────────────────────┘     │`  
-                                  `│                           │                            │`  
-                                  `│                           ▼ (Raw Answer String)        │`  
-                                  `│   ┌──────────────────────────────────────────────┐     │`  
-                                  `│   │            3. Judge Node (LLM 2)             │     │`  
-                                  `│   │    - Task: Fact Audit & Lineage Check        │     │`  
-                                  `│   │    - Output: Raw Text + Injected Anchors     │     │`  
-                                  `│   └──────────────────────────────────────────────┘     │`  
-                                  `│                           │                            │`  
-                                  `│                           ▼ (Text with Anchor Strings) │`  
-                                  `│   ┌──────────────────────────────────────────────┐     │`  
-                                  `│   │            4. Presentation Layer             │     │`  
-                                  `│   │    - Task: Programmable String Swap          │     │`  
-                                  `│   │    - Output: ANSI Magenta Styled Terminal    │     │`  
-                                  `│   └──────────────────────────────────────────────┘     │`  
-                                  `└────────────────────────────────────────────────────────┘`
+```mermaid
+flowchart TD
+    %% Main Runtime Environment Subgraph
+    subgraph RuntimeEnv ["/path/to/project/Runtime Environment (Local venv/)"]
+        direction TB
+        
+        %% Nodes
+        Layer1("<b>1. Ingestion & Retrieval Layer</b><br/>[User Query] ➔ [Vector Similarity Search]")
+        Layer2("<b>2. Generator Node (LLM 1)</b><br/>Task: Conversational Synthesis<br/>Output: Pure, Unformatted Raw Text")
+        Layer3("<b>3. Judge Node (LLM 2)</b><br/>Task: Fact Audit & Lineage Check<br/>Output: Raw Text + Injected Anchors")
+        Layer4("<b>4. Presentation Layer</b><br/>Task: Programmable String Swap<br/>Output: ANSI Magenta Styled Terminal")
+
+        %% Connections
+        Layer1 -->|Top 4 Chunks in XML| Layer2
+        Layer2 -->|Raw Answer String| Layer3
+        Layer3 -->|Text with Anchor Strings| Layer4
+    end
+
+    %% Styling (Matches the dark theme aesthetic of the first diagram)
+    style RuntimeEnv fill:#fff,stroke:#333,stroke-width:1px,color:#000,stroke-dasharray: 5 5
+    style Layer1 fill:#23272e,stroke:#343942,stroke-width:1px,color:#fff
+    style Layer2 fill:#1f2335,stroke:#3b4261,stroke-width:1px,color:#fff
+    style Layer3 fill:#1f2335,stroke:#3b4261,stroke-width:1px,color:#fff
+    style Layer4 fill:#23272e,stroke:#343942,stroke-width:1px,color:#fff
+```
 
 ## **🔄 Detailed Execution Lifecycle Flow**
 
