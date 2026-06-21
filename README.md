@@ -134,12 +134,59 @@ flowchart TB
 ## **🔄 Detailed Execution Lifecycle Flow**
 
 
-| Stage   ! Description    ! Key Operations      ! Output Artifact  |
-|:--------!---------------!---------------------!-------------------|
-| **1. Ingestion & Context Retrieval**        | System receives user query and executes vector similarity search to gather relevant source material from the knowledge base. The user prompt (e.g., *"What are the deployment specs?"*) triggers embedding computation via local HuggingFace embeddings, then Chroma returns top-4 closest semantic chunks ($k=4$). Python iterates through retrieved items, extracts file metadata headers, and wraps each passage in explicit XML tags:        | User query received → Embedding compute (local) → Similarity search executed on Chroma vector index - `<doc name="nexusflow_deployment.txt">`<br/>- `Production cluster deployments require a minimum of 32GB RAM...`<br/>- `</doc>`    | Compiled XML context bundle containing source metadata headers with embedded text passages              |
-| **2. Generator Node (LLM #1)**        | The full XML document payload plus original question are injected into prompt template v1 and dispatched to the first LLM instance (**qwen3.5:9b**).  Prompt instructions constrain the model to act as support engineer focused purely on natural language composition—explicitly forbidden from tracking bracket syntax or citation formatting markers.| XML context + user query → System prompt injection (temperature=0.7) → Model generation pass with reasoning disabled for speed       | Clean conversational response: *"To deploy a production node you must provide at least 32GB RAM and 8 vCPUs."* (no anchors attached yet)         |
-| **3. Judge Evaluator Node (LLM #2)**      | Generated answer from step 2 is intercepted by Python orchestration code and repackaged into entirely new system prompt for the second model instance (**Judge LLM**). This evaluator receives strict low-temperature instructions ($T \approx 0$) to compare each claim in LLM#1's output against facts contained within XML `<doc>` tags. Model is ordered **never** to modify original answer text—only append citation anchors where claims are substantiated by source material.| Raw answer + XML sources → Cross-examination prompt (T=0.0) → Line-by-line fact verification pass  - Claim matched in doc? YES → Append `BRACKET_START_<filename>_BRACKET_END`<br/>- No match found → Skip citation injection   | Annotated response string with anchor markers: *"To deploy... vCPUs. BRACKET_START_nexusflow_deployment.txt_BRACKET_END"*       |
-| **4. Programmable Presentation**    | Final string containing judge-injected anchors returns to main Python thread where automated `.replace()` substitution pass executes—swapping custom marker strings for high-visibility ANSI escape sequences (`\033[1;95m`). This produces terminal output with bold magenta citation indicators automatically styled without requiring model involvement in formatting decisions.| Anchor string replacement → Terminal rendering via print()  - `BRACKET_START_*_BRACKET_END` → `\033[1;95m[file]\033[m`<br/>- Final text displays citations as bright colored callouts              | Rendered terminal output with inline citation styling applied (magenta bold tags on black background)        |
+
+```mermaid
+flowchart TB
+
+%% --- LIFECYCLE FLOW CHART - VERTICAL TIMELINE (top-to-bottom process flow) ---
+
+    %% ============ STAGE 1: INGESTION & CONTEXT RETRIEVAL ==================
+    
+    S1["Stage 1⃣ Ingestion \& Retrieval Layer"]:::stageBorder
+    
+    Step1a[User Query Received] --> EMB["Embedding Compute (HuggingFace local)"]
+    EMB --> CHROM[(ChromaDB Similarity Search<br/>k=4 top chunks)]
+    
+    DOCs{Retrieved Docs}
+    DOCClose[`<doc name="nexusflow_deployment.txt">`] -.-> DOCs -.-
+    TEXT[`Production cluster deployments require a minimum of 32GB RAM...`] -.-> DOCClose
+    
+    Step1b[XML Tag Wrap Each Passage] --> XMLBUNDLE["Compile: <root><doc>...</doc></root>"]:::subtle
+
+    %% ============ STAGE 2: GENERATOR NODE (LLM #1) ==========================
+    
+    ArrowDown[S1 → S2 ▼]:::arrowStyle
+    
+    S2["Stage 2⃣ Generator Node<br/>(qwen3.5:9b - LLM#1)"]:::stageBorder
+    
+    Prompt2[System: Support Engineer | Temp=0.7<br/>Constraint: Natural language only, no formatting syntax]
+    
+    XMLBUNDLE --> PROMPTinject[Inject into ChatPromptTemplate v1 + User Query] --> GENRESP["Raw Generation (reasoning=False)<br/>Output: Pure text"]<br/><i>"To deploy a production node you must provide at least 32GB RAM and 8 vCPUs."</i>
+    
+    %% ============ STAGE 3: JUDGE EVALUATOR NODE (LLM #2) ====================
+
+    ArrowDown2[S2 → S3 ▼]:::arrowStyle
+    
+    S3["Stage 3⃣ Judge Evaluator Node<br/>(Judge LLM - qwen3.5 | T=0.0)"]:::stageBorder
+    
+    Prompt3[System: Verify each claim vs source docs.<br/>Output anchors ONLY where facts match.]
+    
+    GENRESP -.-> CLAIMs[Extract claims from output]
+    CLAIMs --> VERIFY{Compare vs XML sources}
+    
+    VerifyYes["Match found? → Append:<br/>(BRACKET_START_nexusflow_deployment.txt_BRACKET_END)"]:::subtle
+    
+    %% ============ STAGE 4: PRESENTATION LAYER ==============================
+
+    ArrowDown3[S3 → S4 ▼]:::arrowStyle
+    
+    REPL[Python .replace() swap<br/>Custom anchors → ANSI magenta colors (\033[1;95m)]
+    
+    Terminal[(Rendered Output:<br/>Magenta Citation Tags on Black Background):::outputNode]
+
+```
+
+> **Note**: This vertical `flowchart TB` replaces the wrapped markdown table (previously broken due to long cell text). Each stage connects via downward arrows showing sequential processing from ingestion through presentation.
 
 ## **🎯 Why Inline Citations Achieve 100% Reliability**
 
